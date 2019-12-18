@@ -1,7 +1,8 @@
 // include libraries
 //#include "SSD1306.h"
 #include <Servo.h>
- 
+#include "ESP8266WiFi.h"
+
 // setup servo
 #define SERVORIGHT   20
 #define SERVOCENTRE  100
@@ -9,10 +10,17 @@
 #define SERVOPIN     16
 #define TRIGPIN      13    // pin no. 13  is D7 ESP8266
 #define ECHOPIN      15    // pin no. 15  is D8 ESP8266
+#define WIFINAME "testv"
+#define WIFIPW   "123456789"
 
 int Speed = 900;  // max 1024
 int TSpeed = 1020;  //Turning Speed
 Servo servo;
+int signalstress()
+{
+    int signalst = WiFi.RSSI();
+    return signalst;
+} 
 
 void stoped()
 {
@@ -25,8 +33,8 @@ void forward()
 {
     analogWrite(5, 800);
     analogWrite(4, 1000);
-    digitalWrite(0, 1);
-    digitalWrite(2, 1);
+    digitalWrite(0, 0);
+    digitalWrite(2, 0);
     Serial.println("forward");
 }
  
@@ -34,25 +42,25 @@ void back()
 {
     analogWrite(5, 800);
     analogWrite(4, 1000);
-    digitalWrite(0, 0);
-    digitalWrite(2, 0);
+    digitalWrite(0, 1);
+    digitalWrite(2, 1);
     Serial.println("Back");
 }
  
 void left()
 {
     analogWrite(5, 800);
-    analogWrite(4, 0);
+    analogWrite(4, 100);
     digitalWrite(0, 0);
-    digitalWrite(2, 1);
+    digitalWrite(2, 0);
     Serial.println("Left");
 }
  
 void right()
 {
-    analogWrite(5, 0);
-    analogWrite(4, 1000);
-    digitalWrite(0, 1);
+    analogWrite(5, 100);
+    analogWrite(4, 800);
+    digitalWrite(0, 0);
     digitalWrite(2, 0);
     Serial.println("right");
 }
@@ -119,10 +127,19 @@ char scan()
 void setup()
 {
     Serial.begin(115200);
+    WiFi.begin(WIFINAME,WIFIPW);
+    Serial.print("Connecting...");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(".");    
+    }
+    Serial.println();
+    Serial.print("Connected, IP Address:");
+    Serial.println(WiFi.localIP());
     Serial.println("Alictronix Obstacle Bot 2WD/4WD v1.0");
     // set the servo data pin
     servo.attach(SERVOPIN);
-
     pinMode(5, OUTPUT);
     pinMode(4, OUTPUT);
     pinMode(0, OUTPUT);
@@ -159,9 +176,9 @@ void loop()
             Serial.println("Turn around..."); 
            // display.drawString(10, 40, "Turn around...") ;         
             back();
-            delay(300);
+            delay(1000);
             left();
-            delay(700);
+            delay(1500);
         }
         else
         {
@@ -179,14 +196,14 @@ void loop()
               Serial.println("Turn left...");
             //  display.drawString(10, 40, "Turn left...") ; 
                 left();
-                delay(500);
+                delay(1500);
             }
             else if (turn_direction == 'r')
             {
               Serial.println("Turn right...");
             //  display.drawString(10, 40, "Turn right...") ; 
                 right();
-                delay(500);
+                delay(1500);
             }
             else if (turn_direction == 'c')
             {
@@ -196,7 +213,7 @@ void loop()
                 Serial.println("Turn back...");
               //  display.drawString(10, 40, "Turn back...") ; 
                 right();
-                delay(700);
+                delay(2000);
               }
               
             }
